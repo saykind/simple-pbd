@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>PBD Model</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        MathJax = {
+        tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+        svg: { fontCache: 'global' }
+    };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body>
+    <header><h1>Elastic cloth PDB Model</h1></header>
+    <div class="container">
+        <canvas></canvas>
+        <div class="forms-wrapper">
+            <form action="#" id="params">
+                <h2>Simulation parameters</h2>
+                <div> 
+                    <label for="lengthX">LengthX</label><input type="number" name="lengthX" id="lengthX" step="any" value="1.5">
+                    <label for="lengthY">LengthY</label><input type="number" name="lengthY" id="lengthY" step="any" value="1.5">
+                    <label for="cellsX">CellsX</label><input type="number" name="cellsX" id="cellsX" min="4" value="4">
+                    <label for="cellsY">CellsY</label><input type="number" name="cellsY" id="cellsY" min="4" value="4">
+                    <label for="dt">Time step</label><input type="number" name="dt" id="dt" step="any" value="0.01">
+                </div>
+                <div>
+                    <label for="elasticK">Elasticity ($k\in [0,\:1]$)</label>
+                    <input type="number" name="elasticK" id="elasticK" step="any" min="0.0" max="1.0" value="0.8">
+                </div>
+                <div>                    
+                    <label for="gravityFlag">Gravity</label><input type="checkbox" name="gravityFlag" id="gravityFlag">
+                    <label for="gravityG">$g$</label>
+                    <input type="number" name="gravityG" id="gravityG" step="any" value="9.8" disabled>
+                </div>
+                <h3>Oscillating middle point $z(t) = A\sin\omega t$</h3>
+                <div>
+                    <label for="oscillationFlag">On</label><input type="checkbox" name="oscillationFlag" id="oscillationFlag" checked="">
+                    <label for="omega">$\omega$</label><input type="number" name="omega" id="omega" step="any" value="1.0" min="0.0">
+                    <label for="amplitude">$A$</label><input type="number" name="amplitude" id="amplitude" step="any" value="0.5">
+                </div>
+                <button type="submit">Set parameters</button>
+            </form>
+            <form action="#" id="run">
+                <div><label for="colorFlag">Mesh color groups</label><input type="checkbox" name="colorFlag" id="colorFlag"></div>
+                <button type="submit" id="runBtn" disabled>▶ Run</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="status" style="text-align:center;font-family:sans-serif;"></div>
+    <script src="model.js"></script>
+</body>
+</html>
