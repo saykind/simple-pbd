@@ -142,19 +142,36 @@ class Model {
 
     async initGPU() {
         try {
+            const report = '<a href="https://webgpureport.org" target="_blank" rel="noopener">webgpureport.org</a>';
+            if (!navigator.gpu) {
+                document.getElementById('status').innerHTML =
+                    'WebGPU is not supported by this browser (requires Chrome/Edge or Safari 18+). ' +
+                    'Check whether WebGPU is enabled at ' + report;
+                document.getElementById('status').style.color = 'red';
+                return;
+            }
             let adapter = await navigator.gpu.requestAdapter();
             if (!adapter) {
-                document.getElementById('status').textContent = 'WebGPU не поддерживается';
+                document.getElementById('status').innerHTML =
+                    'Could not get a GPU adapter. Check the WebGPU status at ' + report;
+                document.getElementById('status').style.color = 'red';
                 return;
             }
             this.device = await adapter.requestDevice();
+
+            this.device.addEventListener('uncapturederror', (event) => {
+                console.error('WebGPU uncaptured error:', event.error.message);
+                let status = document.getElementById('status');
+                status.textContent = 'GPU error: ' + event.error.message;
+                status.style.color = 'red';
+            });
 
             this.context = canvas.getContext('webgpu');
             this.format = navigator.gpu.getPreferredCanvasFormat();
             this.context.configure({ device: this.device, format: this.format });
         } catch (error) {
-            console.error('Ошибка:', error);
-            document.getElementById('status').textContent = 'Ошибка: ' + error.message;
+            console.error('Error:', error);
+            document.getElementById('status').textContent = 'Error: ' + error.message;
             document.getElementById('status').style.color = 'red';
         }
     }
@@ -173,8 +190,8 @@ class Model {
             }
             
             @group(0) @binding(0) var<uniform> params: CameraParams;
-            @group(0) @binding(1) var<uniform> colorGroupSizes: array<u32, 10>;
-            @group(0) @binding(2) var<uniform> colorGroupOffsets: array<u32, 10>;
+            @group(0) @binding(1) var<storage, read> colorGroupSizes: array<u32>;
+            @group(0) @binding(2) var<storage, read> colorGroupOffsets: array<u32>;
             @group(0) @binding(3) var<storage, read> vertices: array<vec4f>;
             @group(0) @binding(4) var<storage, read> triangleIndices: array<u32>;
             @group(0) @binding(5) var<storage, read> wireframeIndices: array<u32>;
@@ -247,8 +264,8 @@ class Model {
                 @builtin(vertex_index) vertexIndex : u32, 
                 @builtin(instance_index) offset_id : u32) -> VertexOutput 
             {
-                let colors = array( vec4f(1., 0., 0., 1.), vec4f(0., 1., 0., 1.), vec4f(0., 0., 1., 1.), 
-                    vec4f(1., 1., 0., 1.), vec4f(1., 0., 1., 1.), vec4f(0., 1., 1., 1.), 
+                let colors = array<vec4f, 8>( vec4f(1., 0., 0., 1.), vec4f(0., 1., 0., 1.), vec4f(0., 0., 1., 1.),
+                    vec4f(1., 1., 0., 1.), vec4f(1., 0., 1., 1.), vec4f(0., 1., 1., 1.),
                     vec4f(0., 0., 0., 1.), vec4f(1., 1., 1., 1.));
 
                 var output: VertexOutput;
@@ -278,8 +295,8 @@ class Model {
         let bindGroupLayout = this.device.createBindGroupLayout({
             entries: [
                 { binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: "uniform", }, },
-                { binding: 1, visibility: GPUShaderStage.VERTEX, buffer: { type: "uniform", }, },
-                { binding: 2, visibility: GPUShaderStage.VERTEX, buffer: { type: "uniform", }, },
+                { binding: 1, visibility: GPUShaderStage.VERTEX, buffer: { type: "read-only-storage", }, },
+                { binding: 2, visibility: GPUShaderStage.VERTEX, buffer: { type: "read-only-storage", }, },
                 { binding: 3, visibility: GPUShaderStage.VERTEX, buffer: { type: "read-only-storage", }, },
                 { binding: 4, visibility: GPUShaderStage.VERTEX, buffer: { type: "read-only-storage", }, },
                 { binding: 5, visibility: GPUShaderStage.VERTEX, buffer: { type: "read-only-storage", }, },
@@ -379,8 +396,8 @@ class Model {
             };
 
             @group(0) @binding(0) var<uniform> params: SimParams;
-            @group(0) @binding(1) var<uniform> colorGroupSizes: array<u32, 10>;
-            @group(0) @binding(2) var<uniform> colorGroupOffsets: array<u32, 10>;
+            @group(0) @binding(1) var<storage, read> colorGroupSizes: array<u32>;
+            @group(0) @binding(2) var<storage, read> colorGroupOffsets: array<u32>;
             @group(0) @binding(3) var<storage, read_write> pos: array<vec4f>;
             @group(0) @binding(4) var<storage, read_write> newPos: array<vec4f>;
             @group(0) @binding(5) var<storage, read_write> velocities: array<vec4f>;
@@ -456,8 +473,8 @@ class Model {
         // Pipelines
         let bindGroupLayout = this.device.createBindGroupLayout({
             entries: [ { binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: "uniform", }, },
-                { binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: "uniform", }, },
-                { binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: { type: "uniform", }, },
+                { binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: "read-only-storage", }, },
+                { binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: { type: "read-only-storage", }, },
                 { binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: { type: "storage", }, },
                 { binding: 4, visibility: GPUShaderStage.COMPUTE, buffer: { type: "storage", }, },
                 { binding: 5, visibility: GPUShaderStage.COMPUTE, buffer: { type: "storage", }, },
@@ -640,8 +657,9 @@ class Model {
         this.camera = {angle: 0., distance: 12.0, height: 10.};
         let cameraParams = new Float32Array([this.camera.angle, this.camera.distance, this.camera.height]);
         this.camBuffer = this.createGPUBuffer(cameraParams, usageFlags);
-        this.colorGroupSizeBuffer = this.createGPUBuffer(this.mesh.colorGroupSizes, usageFlags);
-        this.colorGroupOffsetBuffer = this.createGPUBuffer(this.mesh.colorGroupOffsets, usageFlags);
+        let storageUsage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST;
+        this.colorGroupSizeBuffer = this.createGPUBuffer(this.mesh.colorGroupSizes, storageUsage);
+        this.colorGroupOffsetBuffer = this.createGPUBuffer(this.mesh.colorGroupOffsets, storageUsage);
         
         let meshDim = new Uint32Array([this.mesh.nodesNumX, this.mesh.nodesNumY]);
         let sParam = new Float32Array([
