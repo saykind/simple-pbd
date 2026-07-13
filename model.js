@@ -134,6 +134,25 @@ class Mesh {
 }
 
 class Model {
+    showError(message) {
+        console.error(message);
+        let status = document.getElementById('status');
+        status.textContent = message;
+        status.style.color = 'red';
+    }
+
+    reportCompilation(label, info) {
+        let errors = info.messages.filter(m => m.type === 'error');
+        if (errors.length > 0) {
+            this.showError(label + ' shader error: ' + errors.map(m => m.message).join('; '));
+            return false;
+        }
+        if (info.messages.length > 0) {
+            console.warn(label + ' shader warn:', info.messages);
+        }
+        return true;
+    }
+
     createGPUBuffer(cpuArray, usageFlags) {
         let gpuBuffer = this.device.createBuffer({size: cpuArray.byteLength, usage: usageFlags });
         this.device.queue.writeBuffer(gpuBuffer, 0, cpuArray);
@@ -287,9 +306,7 @@ class Model {
         let renderModule = this.device.createShaderModule({ code: renderShaderCode });
 
         let info = await renderModule.getCompilationInfo();
-        if (info.messages.length > 0) {
-            console.warn('Shader warn:', info.messages);
-        }
+        this.reportCompilation('Render', info);
 
         // Pipelines
         let bindGroupLayout = this.device.createBindGroupLayout({
@@ -467,9 +484,7 @@ class Model {
         `;
         let computeModule = this.device.createShaderModule({ code: computeShaderCode });
         let info = await computeModule.getCompilationInfo();
-        if (info.messages.length > 0) {
-            console.warn('Shader warn:', info.messages);
-        }
+        this.reportCompilation('Compute', info);
         // Pipelines
         let bindGroupLayout = this.device.createBindGroupLayout({
             entries: [ { binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: "uniform", }, },
@@ -638,6 +653,10 @@ class Model {
         }
 
         await this.initGPU();
+        if (!this.device) {
+            document.getElementById('runBtn').disabled = false;
+            return;
+        }
 
         let usageFlags = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST;
         this.positionBuffer = this.createGPUBuffer(this.positions, usageFlags);
@@ -674,8 +693,15 @@ class Model {
         this.device.queue.writeBuffer(this.simBuffer, 0, meshDim);
         this.device.queue.writeBuffer(this.simBuffer, meshDim.byteLength, sParam);
 
+        this.device.pushErrorScope('validation');
         await this.initRenderShader();
         await this.initComputeShader();
+        let scopeError = await this.device.popErrorScope();
+        if (scopeError) {
+            this.showError('GPU pipeline error: ' + scopeError.message);
+            document.getElementById('runBtn').disabled = false;
+            return;
+        }
         this.colorFlag = false;
 
         this.render(this.colorGroupSizeBuffer,  this.colorGroupOffsetBuffer);
