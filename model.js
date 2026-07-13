@@ -237,7 +237,7 @@ class Model {
                     vec4f(-dot(right, vCam), -dot(up, vCam), dot(forward, vCam), 1.0)
                 );
                 
-                let aspect = 800.0 / 600.0;
+                let aspect = 600.0 / 400.0;
                 let fov = 1.0;
                 let near = 0.1;
                 let far = 100.0;
@@ -289,7 +289,7 @@ class Model {
 
                 var output: VertexOutput;
                 output.position = rotate(vertices[wireframeIndices[vertexIndex]]);
-                for(var i = 0; i < 10; i = i + 1) {
+                for(var i = 0; i < 8; i = i + 1) {
                     if(vertexIndex >= colorGroupOffsets[i] && vertexIndex < colorGroupOffsets[i] + colorGroupSizes[i]) {
                         output.color = colors[i];
                         break;
@@ -592,7 +592,7 @@ class Model {
                 computePass.setPipeline(this.projectionPipeline);
                 this.setColorIndex(color);
                 //await this.device.queue.onSubmittedWorkDone();
-                computePass.dispatchWorkgroups(Math.ceil(this.mesh.colorGroupSizes[color] / 2 / 64));;
+                computePass.dispatchWorkgroups(Math.ceil(this.mesh.colorGroupSizes[color] / 2 / 64));
                 computePass.end();
                 this.device.queue.submit([commandEncoder.finish()]);
                 //await this.device.queue.onSubmittedWorkDone()
@@ -704,14 +704,15 @@ class Model {
         }
         this.colorFlag = false;
 
-        this.render(this.colorGroupSizeBuffer,  this.colorGroupOffsetBuffer);
+        this.render();
         this.animFlag = false;
         document.getElementById('runBtn').disabled = false;
     }
 
     freeGPU() {
-        let buffers = [this.positionBuffer, this.newPosBuffer, this.velocityBuffer, this.invMassBuffer, 
-                    this.triangleBuffer, this.wireframeBuffer, this.camBuffer, this.simBuffer, this.phaseBuffer ];
+        let buffers = [this.positionBuffer, this.newPosBuffer, this.velocityBuffer, this.invMassBuffer,
+                    this.triangleBuffer, this.wireframeBuffer, this.camBuffer, this.simBuffer, this.phaseBuffer,
+                    this.colorGroupSizeBuffer, this.colorGroupOffsetBuffer, this.colorIdxBuffer ];
         buffers.forEach(buffer => {
             if(buffer) {
                 buffer.destroy();
