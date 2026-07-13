@@ -421,7 +421,7 @@ class Model {
             @group(0) @binding(6) var<storage, read_write> invMasses: array<f32>;
             @group(0) @binding(7) var<storage, read_write> phase: f32;
             @group(0) @binding(8) var<storage, read> wireframeIndices: array<u32>;
-            @group(0) @binding(9) var<storage, read> colorIdx: u32;
+            @group(0) @binding(9) var<uniform> colorIdx: u32;
 
             @compute @workgroup_size(64)
             fn predict(@builtin(global_invocation_id) id: vec3<u32>) {
@@ -496,7 +496,7 @@ class Model {
                 { binding: 6, visibility: GPUShaderStage.COMPUTE, buffer: { type: "storage", }, },
                 { binding: 7, visibility: GPUShaderStage.COMPUTE, buffer: { type: "storage", }, },
                 { binding: 8, visibility: GPUShaderStage.COMPUTE, buffer: { type: "read-only-storage", }, },
-                { binding: 9, visibility: GPUShaderStage.COMPUTE, buffer: { type: "read-only-storage", }, },
+                { binding: 9, visibility: GPUShaderStage.COMPUTE, buffer: { type: "uniform", }, },
             ],
         });
         let pipelineLayout = this.device.createPipelineLayout({
@@ -664,7 +664,7 @@ class Model {
         this.velocityBuffer = this.createGPUBuffer(this.velocities, usageFlags);
         this.invMassBuffer = this.createGPUBuffer(this.invMasses, usageFlags);
         let colorIdx = new Uint32Array([0]);
-        this.colorIdxBuffer = this.createGPUBuffer(colorIdx, usageFlags);
+        this.colorIdxBuffer = this.createGPUBuffer(colorIdx, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
         let phase = new Float32Array([0.]);
         this.phaseBuffer = this.createGPUBuffer(phase, usageFlags);
         
