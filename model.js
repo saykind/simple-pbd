@@ -1,3 +1,6 @@
+const APP_VERSION = 'v1.0.0';
+document.getElementById('version').textContent = 'simple-pbd ' + APP_VERSION;
+
 canvas = document.querySelector('canvas');
 canvas.width = 600;
 canvas.height = 400;
