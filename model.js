@@ -153,8 +153,8 @@ class Model {
             this.format = navigator.gpu.getPreferredCanvasFormat();
             this.context.configure({ device: this.device, format: this.format });
         } catch (error) {
-            console.error('Ошибка:', error);
-            document.getElementById('status').textContent = 'Ошибка: ' + error.message;
+            console.error('Error:', error);
+            document.getElementById('status').textContent = 'Error: ' + error.message;
             document.getElementById('status').style.color = 'red';
         }
     }
@@ -436,8 +436,6 @@ class Model {
                         (length(dr) - dl0) * normalize(dr);
                     newPos[vIdx1] -= invMasses[vIdx1] * dr;
                     newPos[vIdx2] += invMasses[vIdx2] * dr;
-                    //newPos[vIdx1][2] += 0.001;
-                    //newPos[vIdx2][2] += 0.001;
                 }
             }
 
@@ -684,7 +682,7 @@ class Model {
 let model = new Model();
 initParams = {
     lengthX: 10., lengthY: 10., 
-    cellsX: 25, cellsY: 25, dt: 0.01,
+    cellsX: 20, cellsY: 25, dt: 0.01,
     elasticK: 0.5, gravityG: 0.0,
     omega: 5.0, amplitude: 0.5
 };
