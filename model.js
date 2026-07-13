@@ -341,12 +341,12 @@ class Model {
         this.facesBindGroup = this.device.createBindGroup({
             layout: bindGroupLayout,
             entries: [             
-                { binding: 0, resource: this.camBuffer},
-                { binding: 1, resource: this.colorGroupSizeBuffer},
-                { binding: 2, resource: this.colorGroupOffsetBuffer},
-                { binding: 3, resource: this.positionBuffer},
-                { binding: 4, resource: this.triangleBuffer},
-                { binding: 5, resource: this.wireframeBuffer},
+                { binding: 0, resource: { buffer: this.camBuffer }},
+                { binding: 1, resource: { buffer: this.colorGroupSizeBuffer }},
+                { binding: 2, resource: { buffer: this.colorGroupOffsetBuffer }},
+                { binding: 3, resource: { buffer: this.positionBuffer }},
+                { binding: 4, resource: { buffer: this.triangleBuffer }},
+                { binding: 5, resource: { buffer: this.wireframeBuffer }},
             ],
         });
         this.wireframePipeline = this.device.createRenderPipeline({
@@ -387,12 +387,12 @@ class Model {
         this.wireframeBindGroup = this.device.createBindGroup({
             layout: bindGroupLayout,        
             entries: [
-                { binding: 0, resource: this.camBuffer},
-                { binding: 1, resource: this.colorGroupSizeBuffer},
-                { binding: 2, resource: this.colorGroupOffsetBuffer},
-                { binding: 3, resource: this.positionBuffer},
-                { binding: 4, resource: this.triangleBuffer},
-                { binding: 5, resource: this.wireframeBuffer},
+                { binding: 0, resource: { buffer: this.camBuffer }},
+                { binding: 1, resource: { buffer: this.colorGroupSizeBuffer }},
+                { binding: 2, resource: { buffer: this.colorGroupOffsetBuffer }},
+                { binding: 3, resource: { buffer: this.positionBuffer }},
+                { binding: 4, resource: { buffer: this.triangleBuffer }},
+                { binding: 5, resource: { buffer: this.wireframeBuffer }},
             ],
         });    
     }
@@ -506,16 +506,16 @@ class Model {
         this.computeBindGroup = this.device.createBindGroup({
             layout: bindGroupLayout,
             entries: [
-                { binding: 0, resource: this.simBuffer},
-                { binding: 1, resource: this.colorGroupSizeBuffer},
-                { binding: 2, resource: this.colorGroupOffsetBuffer},
-                { binding: 3, resource: this.positionBuffer},
-                { binding: 4, resource: this.newPosBuffer},
-                { binding: 5, resource: this.velocityBuffer},
-                { binding: 6, resource: this.invMassBuffer},
-                { binding: 7, resource: this.phaseBuffer},
-                { binding: 8, resource: this.wireframeBuffer},
-                { binding: 9, resource: this.colorIdxBuffer},
+                { binding: 0, resource: { buffer: this.simBuffer }},
+                { binding: 1, resource: { buffer: this.colorGroupSizeBuffer }},
+                { binding: 2, resource: { buffer: this.colorGroupOffsetBuffer }},
+                { binding: 3, resource: { buffer: this.positionBuffer }},
+                { binding: 4, resource: { buffer: this.newPosBuffer }},
+                { binding: 5, resource: { buffer: this.velocityBuffer }},
+                { binding: 6, resource: { buffer: this.invMassBuffer }},
+                { binding: 7, resource: { buffer: this.phaseBuffer }},
+                { binding: 8, resource: { buffer: this.wireframeBuffer }},
+                { binding: 9, resource: { buffer: this.colorIdxBuffer }},
             ],
         });
         
