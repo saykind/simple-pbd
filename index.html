@@ -14,18 +14,18 @@
     src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 </head>
 <body>
-    <header><h1>Elastic cloth PDB Model</h1></header>
+    <header><h1>Elastic cloth PBD Model</h1></header>
     <div class="container">
         <canvas></canvas>
         <div class="forms-wrapper">
             <form action="#" id="params">
                 <h2>Simulation parameters</h2>
                 <div> 
-                    <label for="lengthX">LengthX</label><input type="number" name="lengthX" id="lengthX" step="any" value="1.5">
-                    <label for="lengthY">LengthY</label><input type="number" name="lengthY" id="lengthY" step="any" value="1.5">
+                    <label for="lengthX">LengthX</label><input type="number" name="lengthX" id="lengthX" step="any" min="1." value="1.5">
+                    <label for="lengthY">LengthY</label><input type="number" name="lengthY" id="lengthY" step="any" min="1." value="1.5">
                     <label for="cellsX">CellsX</label><input type="number" name="cellsX" id="cellsX" min="4" value="4">
                     <label for="cellsY">CellsY</label><input type="number" name="cellsY" id="cellsY" min="4" value="4">
-                    <label for="dt">Time step</label><input type="number" name="dt" id="dt" step="any" value="0.01">
+                    <label for="dt">Time step</label><input type="number" name="dt" id="dt" step="any" min="0." value="0.01">
                 </div>
                 <div>
                     <label for="elasticK">Elasticity ($k\in [0,\:1]$)</label>
